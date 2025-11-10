@@ -2,9 +2,26 @@ import { GoogleGenAI } from '@google/genai';
 import type { GeneratorOptions } from '../types';
 import { SYSTEM_INSTRUCTION } from '../constants';
 
-// Initialize the Google Gemini API client.
-// The API key is expected to be available in the environment variables.
-const ai = new GoogleGenAI({ apiKey: process.env.VITE_API_KEY });
+// Declare ai client variable, but do not initialize it yet.
+let ai: GoogleGenAI | null = null;
+
+/**
+ * Lazily initializes and returns the GoogleGenAI client instance.
+ * This prevents the "API Key must be set" error on app load if the key is missing.
+ */
+// Fix: Use process.env.API_KEY as per guidelines. This also resolves issues with vite/client types.
+const getAiClient = (): GoogleGenAI => {
+  if (!ai) {
+    if (!process.env.API_KEY) {
+      // This should not be reached if the App component's check is working,
+      // but it's a safeguard.
+      throw new Error('API_KEY is not configured in environment variables.');
+    }
+    ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+  }
+  return ai;
+};
+
 
 /**
  * Generates a CCTV prompt using the Google Gemini API.
@@ -16,6 +33,7 @@ const ai = new GoogleGenAI({ apiKey: process.env.VITE_API_KEY });
 export const generateCctvPrompt = async (options: GeneratorOptions): Promise<string> => {
   console.log("Generating prompt with options:", options);
 
+  const client = getAiClient(); // Get or initialize the client.
   const model = 'gemini-2.5-flash';
 
   const userPrompt = `Generate a CCTV prompt with the following specifications:
@@ -26,7 +44,7 @@ export const generateCctvPrompt = async (options: GeneratorOptions): Promise<str
 `;
 
   try {
-    const response = await ai.models.generateContent({
+    const response = await client.models.generateContent({
       model: model,
       contents: userPrompt,
       config: {

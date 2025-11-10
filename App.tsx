@@ -1,5 +1,4 @@
 
-
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Header } from './components/Header';
 import { PromptGenerator } from './components/PromptGenerator';
@@ -135,8 +134,9 @@ const ConfigurationError = ({ missingKeys }: { missingKeys: string[] }) => (
           {missingKeys.map(key => <li key={key}><code className="bg-slate-700 text-red-400 px-1.5 py-0.5 rounded-sm">{key}</code></li>)}
         </ul>
         <p className="mt-4 font-bold text-slate-200">How to fix this (for Vercel):</p>
+        {/* Fix: Updated instructions to remove VITE_ prefix hint, aligning with process.env usage. */}
         <p className="mt-2 text-slate-400">
-          Go to your project settings in Vercel, navigate to the "Environment Variables" section, and add the missing keys with their corresponding values. Make sure they are available in the production environment. Remember to use the `VITE_` prefix.
+          Go to your project settings in Vercel, navigate to the "Environment Variables" section, and add the missing keys with their corresponding values. Make sure they are available in the production environment.
         </p>
       </div>
     </div>
@@ -212,10 +212,9 @@ const App: React.FC = () => {
   const [isLoadingGallery, setIsLoadingGallery] = useState<boolean>(true);
   const generatorRef = useRef<HTMLElement>(null);
   
+  // Fix: Use process.env.API_KEY as per guidelines. This also resolves issues with vite/client types.
   const missingEnvKeys = [
-    !process.env.VITE_API_KEY && 'VITE_API_KEY',
-    !process.env.VITE_SUPABASE_URL && 'VITE_SUPABASE_URL',
-    !process.env.VITE_SUPABASE_ANON_KEY && 'VITE_SUPABASE_ANON_KEY'
+    !process.env.API_KEY && 'API_KEY'
   ].filter(Boolean) as string[];
 
   useEffect(() => {
